@@ -28,7 +28,8 @@ def f2(x):
 y2 = f2(x)
 plt.plot(x, y2, label='$f_{2}(x) = x^9 - ... - 512$')
 plt.legend()
-plt.show()
+plt.savefig('homework/hw1/hw1_q1_p_ii.png')
+# plt.show()
 
 #%% q5
 
@@ -51,7 +52,8 @@ plt.semilogx(deltas, y_2, label=f'$x = {x_2:.1e}$')
 plt.xlabel('$\delta$')
 plt.ylabel('Difference between $f_1$ and $f_2$')
 plt.legend(frameon=False)
-plt.show()
+plt.savefig('homework/hw1/hw1_q5_p_b.png')
+# plt.show()
 
 # part (c)
 def f3(x, delta):
@@ -65,4 +67,5 @@ plt.semilogx(deltas, y_4, label=f'$x = {x_2:.1e}$')
 plt.xlabel('$\delta$')
 plt.ylabel('Difference between $f_2$ and $f_3$')
 plt.legend(frameon=False)
-plt.show()
+plt.savefig('homework/hw1/hw1_q5_p_c.png')
+# plt.show()
