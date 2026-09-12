@@ -12,6 +12,46 @@ plt.rcParams.update({
     'figure.dpi': 200
 })
 
+#%% q2
+
+from scipy.linalg import inv
+from scipy.linalg import norm
+
+A = 0.5 * jnp.array([[1,          1],
+                     [1 + 1e-10, 1 - 1e-10]])
+
+b = jnp.array([1.0, 1.0])
+
+A_inv = inv(A)
+
+x = A_inv @ b
+
+
+# part b
+
+A_2_norm = norm(A, ord=2)
+A_inv_2_norm = norm(A_inv, ord=2)
+
+cond_num = A_2_norm * A_inv_2_norm
+
+print(f'condition number = {cond_num}')
+
+
+# part c
+
+delta_b = jnp.array([1e-5, -1e-5])
+
+b_perturbed = b + delta_b
+
+x_perturbed = A_inv @ b_perturbed
+
+delta_x = x_perturbed - x
+
+rel_err = norm(delta_x, ord=2) / norm(x, ord=2)
+
+print(f'relative error = {rel_err}')
+
+
 #%% q3
 
 # part c
@@ -102,7 +142,7 @@ ax.text(
     }
 )
 
-plt.savefig('q4c.png')
+# plt.savefig('q4c.png')
 plt.show()    
 
 print(f'root={root}, iterations={count}')
@@ -143,4 +183,58 @@ while True:
 
 print(f'root from bisection={root}')
 print(f'iterations from bisction with tol=1e-3: {count}')
-print(f'theoratical upper bound for tol=1e-3: {(jnp.log(1e-3) - jnp.log(3)) / jnp.log(1/2)}')
+print(f'theoretical upper bound for tol=1e-3: {(jnp.log(1e-3) - jnp.log(3)) / jnp.log(1/2)}')
+
+#%% q6
+
+# part a
+
+def f(x):
+    return x - 4 * jnp.sin(2 * x) - 3
+
+x = jnp.linspace(-1, 2.35 * jnp.pi, 1000)
+# x = jnp.linspace(6.5, 7.5, 1000)
+plt.plot(x, f(x))
+plt.hlines(0, -0.5 * jnp.pi, 2.5 * jnp.pi, 'k')
+# plt.hlines(0, 6, 8, 'k')
+
+plt.grid()
+plt.xlabel('x')
+plt.ylabel('f(x)')
+
+plt.title('$f(x)=x-4sin(2x)-3$')
+
+# plt.savefig('q6a.png')
+plt.show()
+
+# part b
+
+def g(x):
+    return -jnp.sin(2 * x) + 5 * x / 4 - 3 / 4
+
+tol = 1e-10
+x_guesses = [1, 2, 3, 4, 5]
+
+for i, x_guess in enumerate(x_guesses):
+
+    x_initial = x_guess
+    count = 0
+
+    while True:
+
+        x_new = g(x_guess)
+
+        err = jnp.abs(x_new - x_guess)
+
+        if err < tol:
+            break
+
+        x_guess = x_new
+        count += 1
+
+    print(f'iteration number {i + 1}')
+    print(f'For initial guess x = {x_initial}')
+    print(f'root = {x_new}')
+    print(f'iterations = {count}')
+    print(f'error estimate = {err}')
+    print()
