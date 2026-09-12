@@ -1,0 +1,83 @@
+\documentclass[12pt]{article}
+
+% ------------------------------------------------------------
+% Packages
+% ------------------------------------------------------------
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+% ------------------------------------------------------------
+% Document Information
+% ------------------------------------------------------------
+\title{Lab 2}
+\author{Chuan Wei Heng}
+\date{\today}
+
+% ------------------------------------------------------------
+% Document
+% ------------------------------------------------------------
+\begin{document}
+
+\maketitle
+
+We solved for an analytic solution for order of convergence.
+To do this, begin with the expression
+
+\begin{equation}
+    \frac{|p_{n+1}-p|}{|p_n-p|^\alpha}=\lambda.
+\end{equation}
+
+Nikole taught us a cool trick. Let $\varepsilon_k$ denote $
+|p_k-p^*|$, where $p_k$ is the $k^{th}$ iteration of an 
+algorithm with $p^*$ being the value we are searching for. 
+Then:
+
+\[
+\frac{\varepsilon_{k+1}}{\varepsilon_k^\alpha}\approx\lambda
+\]
+
+\[
+log(\frac{\varepsilon_{k+1}}{\varepsilon_k^\alpha})\approx log(\lambda)
+\]
+\[
+log(\varepsilon_{k+1})-log(\varepsilon_k^\alpha)=log(\lambda)
+\]
+\[
+log(\varepsilon_{k+1})-\alpha log(\varepsilon_k)=log(\lambda)
+\]
+
+Now, consider:
+
+\begin{equation}
+    log(\varepsilon_{k+1})-\alpha log(\varepsilon_k)=log(\lambda)
+    \label{eq:k+1}
+\end{equation}
+
+\begin{equation}
+    log(\varepsilon_{k+1})-\alpha log(\varepsilon_k)=log(\lambda)
+    \label{eq:k}.
+\end{equation}
+
+We subtract \ref{eq:k} from \ref{eq:k+1} to obtain
+
+\[
+    log(\varepsilon_{k+1})-log(\varepsilon_k)+\alpha log(
+        \varepsilon_{k-1})-\alpha log(\varepsilon_k)=0.
+\]
+
+Notice we have eliminated the asymptotic error constant 
+$\lambda$. Hence, we obtain
+
+\begin{equation}
+    \alpha=\frac{log(\frac{\varepsilon_{k+1}}{\varepsilon_k})}
+    {\frac{\varepsilon_k}{\varepsilon_{k-1}}}.
+\end{equation}
+
+For the later exercises, we turn the reader towards the git 
+repository by \textit{chuanweiheng-cell} entitled APPM4600.
+Thank you!
+
+\end{document}

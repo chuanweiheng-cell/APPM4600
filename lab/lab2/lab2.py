@@ -13,13 +13,14 @@ plt.rcParams.update({
     'figure.dpi': 200
 })
 
+
 #%% 2.2 Excercises
 
-# 1
-
-def alpha(a, b, c):
+# 1 
+def alpha(a, b, c): 
     return jnp.log(jnp.abs(a / b)) / jnp.log(jnp.abs(b / c))
 
+print('Fixed point iteration')
 
 # 2a
 g = lambda x : jnp.sqrt(10 / (x + 4))
@@ -35,8 +36,6 @@ while True:
     func = g(p_guess)
     err = jnp.abs(p_guess - func)
     history.append(p_guess)
-    print(f'iteration: {count}')
-    print(f'value={p_guess:.2f}, error={err:.2e}')
     print()
     if err < tol:
         break
@@ -59,37 +58,44 @@ a = history[-1] - p_star
 b = history[-2] - p_star
 c = history[-3] - p_star
 
-print(f'order of convergence = {alpha(a, b, c)}')
+print(f'fixed point number of iterations: {count}')
+print(f'fixed point iteration order of convergence = {alpha(a, b, c)}')
+
 
 #%% 3 Lab day: Exploring order of convergence and creating higher order approximations out of low order approximations
 
 # 3.2 Exercises
 
+#%% Aitken's delta squared acceleration
+
 print("\nAitken's delta squared acceleration technique")
 
-history_atkins = jnp.zeros(len(history) - 2)
-for i in range(len(history) - 2):
-    p_hat = history[i] - ((history[i+1] - history[i])) ** 2 / (history[i+2] - 2 * history[i+1] + history[i])
-    history_atkins = history_atkins.at[i].set(p_hat)
+p_n = history[:-2]
+p_n1 = history[1:-1]
+p_n2 = history[2:]
 
-print()
+history_aitkens = (
+    p_n
+    - (p_n1 - p_n) ** 2
+    / (p_n2 - 2 * p_n1 + p_n)
+)
 
-plt.plot(range(len(history) - 2), history_atkins)
+plt.plot(range(len(history) - 2), history_aitkens, '-o')
 plt.xlabel('Iteration')
 plt.ylabel(r"Atkin's $\Delta^2$")
 plt.show()
 
-a = history_atkins[-1] - p_star
-b = history_atkins[-2] - p_star
-c = history_atkins[-3] - p_star
+a = history_aitkens[-1] - p_star
+b = history_aitkens[-2] - p_star
+c = history_aitkens[-3] - p_star
 
+print(f"Aitken's number of iterations: {count}")
 print(f"Aitken's order of convergence = {alpha(a, b, c)}")
 
 
 # 3.4 Exercises 
 
 print("\nSteffenson’s method")
-
 
 p_guess = 1.5
 history_steffensons = []
