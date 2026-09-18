@@ -1,4 +1,6 @@
 #%% imports
+import os
+os.environ['JAX_PLATFORMS'] = 'cpu'
 import jax
 jax.config.update('jax_enable_x64', True)
 import jax.numpy as jnp
@@ -11,6 +13,7 @@ plt.rcParams.update({
     'axes.spines.right': False,
     'figure.dpi': 200
 })
+
 
 #%% q1
 
@@ -29,11 +32,10 @@ while True:
     func = g(p_guess)
     err = jnp.abs(p_guess - func)
     history.append(p_guess)
-    print()
     if err < tol:
         break
     if count > 9999:
-        print('exceeded maximum number of interations')
+        print('exceeded maximum number of iterations')
         break
     p_guess = func
     count += 1
@@ -43,8 +45,6 @@ history = jnp.array(history)
 a = history[-1] - p_star
 b = history[-2] - p_star
 c = history[-3] - p_star
-
-print(a, b, c)
 
 def alpha(a, b, c): 
     return jnp.log(jnp.abs(a / b)) / jnp.log(jnp.abs(b / c))
@@ -58,8 +58,8 @@ fig, ax = plt.subplots(figsize=(8, 5))
 
 plt.plot(range(count + 1), history, '-o')
 plt.xlabel('Iteration')
-plt.ylabel('g(x)')
-plt.title(r'fixed point iteration for $g(x)=\frac{{2x}}{{3}}+\frac{{1}}{{x^2}}$')
+plt.ylabel('Approximate root')
+plt.title(r'Q1 part b, fixed point iteration for $g(x)=\frac{{2x}}{{3}}+\frac{{1}}{{x^2}}$')
 
 ax.text(
     0.5, 0.45,
@@ -87,7 +87,7 @@ ax.text(
     }
 )
 
-# plt.savefig('q1pb')
+plt.savefig('q1pb')
 plt.show()
 
 # part c
@@ -105,11 +105,10 @@ while True:
     func = g(p_guess)
     err = jnp.abs(p_guess - func)
     history.append(p_guess)
-    print()
     if err < tol:
         break
     if count > 9999:
-        print('exceeded maximum number of interations')
+        print('exceeded maximum number of iterations')
         break
     p_guess = func
     count += 1
@@ -119,8 +118,6 @@ history = jnp.array(history)
 a = history[-1] - p_star
 b = history[-2] - p_star
 c = history[-3] - p_star
-
-print(a, b, c)
 
 def alpha(a, b, c): 
     return jnp.log(jnp.abs(a / b)) / jnp.log(jnp.abs(b / c))
@@ -134,8 +131,8 @@ fig, ax = plt.subplots(figsize=(8, 5))
 
 plt.plot(range(count + 1), history, '-o')
 plt.xlabel('Iteration')
-plt.ylabel('g(x)')
-plt.title(r'fixed point iteration for $g(x)=\frac{{12}}{{1+x}}$')
+plt.ylabel('Approximate root')
+plt.title(r'Q1 part c, fixed point iteration for $g(x)=\frac{{12}}{{1+x}}$')
 
 ax.text(
     0.5, 0.55,
@@ -163,7 +160,7 @@ ax.text(
     }
 )
 
-# plt.savefig('q1pc')
+plt.savefig('q1pc')
 plt.show()
 
 
@@ -182,7 +179,7 @@ tol = 1e-13
 
 # part a
 
-from scipy.special import erf
+from jax.scipy.special import erf
 
 f = lambda x: T_s + delta_T * erf(x / (2 * jnp.sqrt(alpha * t_star)))
 
@@ -197,8 +194,8 @@ plt.plot(x_domain, f_vals)
 plt.axhline(0, color='k')
 plt.xlabel('Depth, x [m]')
 plt.ylabel('f(x)')
-plt.title(r'$f(x)=\Delta T*erf(x/2\sqrt{60\alpha})$')
-# plt.savefig('q2pa.png')
+plt.title('Q2 part a')
+plt.savefig('q2pa.png')
 plt.show()
 
 # part b, bisection method
@@ -239,7 +236,7 @@ ax.plot(range(len(roots)), roots, '-o')
 
 ax.set_ylabel('Root')
 ax.set_xlabel('Iteration')
-ax.set_title('Bisection method convergence profile')
+ax.set_title('Q2 part b, Bisection method convergence profile')
 
 ax.text(
     0.55, 0.55,
@@ -267,10 +264,83 @@ ax.text(
     }
 )
 
+plt.savefig('q2pb.png')
 plt.show()
 
 print(f'root from bisection = {root}')
 print(f'iterations from bisection with tol={tol}: {count}')
+
+# part c, Newton's method
+
+dfdx = jax.grad(f)
+dfdx_range = jax.vmap(dfdx)(x_domain)
+plt.plot(x_domain, dfdx_range)
+plt.ylabel("$f'(x)$")
+plt.xlabel('Depth, x [m]')
+plt.title('Q2, derivative')
+plt.savefig('q2dfdx.png')
+plt.show()
+
+x0 = 0.01
+
+count = 0
+roots = []
+
+while True:
+
+    x1 = x0 - f(x0) / dfdx(x0)
+
+    roots.append(x1)
+    count += 1
+
+    if jnp.abs(x1 - x0) <= tol:
+        root = x1
+        break
+
+    x0 = x1
+
+roots = jnp.array(roots)
+
+fig, ax = plt.subplots(figsize=(8, 5))
+
+ax.plot(range(len(roots)), roots, '-o')
+
+ax.set_ylabel('Root')
+ax.set_xlabel('Iteration')
+ax.set_title("Q2 part c, Newton's method convergence profile")
+
+ax.text(
+    0.55, 0.55,
+    rf'$x_{{\mathrm{{root}}}}\approx {root:.2f}$',
+    transform=ax.transAxes,
+    ha='left',
+    va='top',
+    bbox={
+        'facecolor': 'yellow',
+        'alpha': 0.4,
+        'pad': 5
+    }
+)
+
+ax.text(
+    0.55, 0.42,
+    f'Number of iterations = {count}',
+    transform=ax.transAxes,
+    ha='left',
+    va='top',
+    bbox={
+        'facecolor': 'yellow',
+        'alpha': 0.4,
+        'pad': 5
+    }
+)
+
+plt.savefig('q2pc.png')
+plt.show()
+
+print(f'root from Newton method = {root}')
+print(f'iterations from Newton method with tol={tol}: {count}')    
+
 
 #%% q3
 
@@ -325,7 +395,7 @@ while True:
         root = func
         break
     if count > 9999:
-        print('exceeded maximum number of interations')
+        print('exceeded maximum number of iterations')
         break
     x_guess = func
     count += 1
@@ -335,6 +405,7 @@ plt.xlabel('Iteration')
 plt.ylabel('f(x)')
 plt.title('Q3 part c:')
 
+plt.savefig('q3pc')
 plt.show()
 
 # part d
@@ -361,14 +432,16 @@ while True:
         root = func
         break
     if count > 9999:
-        print('exceeded maximum number of interations')
+        print('exceeded maximum number of iterations')
         break
     x_guess = func
     count += 1
 
-plt.plot(range(count + 1), history, '-o')
+plt.plot(range(count + 1), history, '-o', markevery=30)
 plt.xlabel('Iteration')
 plt.ylabel('f(x)')
 plt.title('Q3 part d')
 
+plt.savefig('q3pd')
 plt.show()
+

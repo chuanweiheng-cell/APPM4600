@@ -1,0 +1,217 @@
+\documentclass[12pt]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                     PREAMBLE / PACKAGES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ----------------------------------------------------------------
+% Font encoding and page geometry
+% ----------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+
+% ----------------------------------------------------------------
+% Line and paragraph spacing
+% ----------------------------------------------------------------
+\usepackage{setspace}
+\usepackage{parskip}
+
+% ----------------------------------------------------------------
+% Section and table-of-contents formatting
+% ----------------------------------------------------------------
+\usepackage{titlesec}
+\usepackage{tocloft}
+
+% ----------------------------------------------------------------
+% Graphics, figures, and page layouts
+% ----------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{animate} % frame-by-frame animations in supported PDF viewers
+\usepackage[font=small]{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{wrapfig}
+\usepackage{multicol}
+
+% ----------------------------------------------------------------
+% Mathematics
+% ----------------------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+\usepackage{cancel}
+\usepackage{gensymb}
+
+% ----------------------------------------------------------------
+% Tables and lists
+% ----------------------------------------------------------------
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{enumitem}
+
+% ----------------------------------------------------------------
+% Colors and highlighting
+% ----------------------------------------------------------------
+\usepackage{xcolor}
+\usepackage{soul}
+\sethlcolor{yellow}
+
+% ----------------------------------------------------------------
+% Headers and footers
+% ----------------------------------------------------------------
+\usepackage{fancyhdr}
+
+% ----------------------------------------------------------------
+% Source-code examples
+% ----------------------------------------------------------------
+\usepackage{listings}
+
+% ----------------------------------------------------------------
+% Citations and hyperlinks
+% ----------------------------------------------------------------
+\usepackage[numbers]{natbib}
+\usepackage{hyperref}
+
+% ----------------------------------------------------------------
+% Default line spacing
+% ----------------------------------------------------------------
+\onehalfspacing
+% ------------------------------------------------------------
+% Document Information
+% ------------------------------------------------------------
+\title{Lab 5}
+\author{Chuan Wei Heng}
+\date{\today}
+
+% ------------------------------------------------------------
+% Document
+% ------------------------------------------------------------
+\begin{document}
+
+\maketitle
+
+For today’s lab, we explore the effectiveness of the 
+Bisection and Newton’s methods and use a 
+guaranteed-convergence criterion for Newton’s method to 
+construct a hybrid root-finding method.
+
+Let us first discuss this criterion derived for 
+guaranteed-convergence. We first recall that the Newton’s
+method algorithm is as follows:
+
+\[
+x_{n+1}=x_{n}-\frac{f(x_n)}{f'(x_n)}.
+\]
+
+We also recall the fixed point convergence theorem discussed
+previously which states that $\forall x_0 \in (x^*-\varepsilon,
+x^*+\varepsilon)$, the iteration will converge to the root 
+$x^*$ if $|f'(x)|<1.$ In other words, if the derivative is
+bounded by 1 in some $\varepsilon$ neighborhood centered 
+about $x^*.$
+
+With that in mind, we treat the Newton’s method iteration as
+a fixed point iteration, by treating $x_{n+1}$ as $g(x)$, we 
+can obtain the following:
+
+\begin{align}
+g'(x) 
+& = 1-\frac{f'(x)^2-f(x)f''(x)}{f'(x)^2},
+\\
+& = \frac{f(x)f''(x)}{f'(x)}.
+\end{align}
+
+With this, we obtain a sufficient criterion for the 
+guaranteed convergence of Newton’s method. We first introduce
+the function of interest. Then, we discuss the convergence 
+behavior of the Bisection and Newton’s methods before 
+proposing a hybrid approach.
+
+\section*{Function of Interest}
+
+The function we study is $f(x)=e^{x^2+7x-30}-1$. We provide a plot below for visualization.
+
+\begin{figure}[H]
+
+    \centering
+
+    \includegraphics[width=0.75\linewidth]{images/plotting_the_function.png}
+
+    \caption{Plot of the function $f(x)=e^{x^2+7x-30}-1$.}
+
+    \label{fig:single_example}
+
+\end{figure}
+
+We now present the various numerical root-finding methods 
+used to determine the roots of this function.
+
+\section*{Bisection Method}
+
+\begin{figure}[H]
+
+    \centering
+
+    \includegraphics[width=0.75\linewidth]{images/bisection.png}
+
+
+    \label{fig:single_example}
+
+\end{figure}
+
+\section*{Newton's Method}
+
+\begin{figure}[H]
+
+    \centering
+
+    \includegraphics[width=0.75\linewidth]{images/Newton.png}
+
+
+    \label{fig:single_example}
+
+\end{figure}
+
+\section*{Proposed Hybrid Method}
+We now propose a hybrid method that should perform more 
+efficiently than the two previously presented methods. This 
+is primarily motivated by the fact that we cannot expect the 
+user to always have a good initial guess for the location of 
+a root, particularly since not every user of a root-finding 
+method will be a numerical analyst.
+
+We therefore consider the main strengths and weaknesses of 
+the Bisection and Newton's methods. The Bisection method has 
+a wide range of convergence but converges relatively slowly, 
+while Newton's method converges rapidly when supplied with a 
+suitable initial guess but can be highly sensitive to that 
+choice.
+
+Thus, we seek to combine the strengths of the two methods 
+while mitigating their respective weaknesses. The proposed 
+schematic is as follows: utilize the Bisection method to 
+find the basin of convergence for the Newton iteration, and 
+switch to Newton's method from there. We present the 
+resulting convergence profile bellow.
+
+\begin{figure}[H]
+
+    \centering
+
+    \includegraphics[width=0.75\linewidth]{images/hybrid.png}
+
+    \label{fig:single_example}
+
+\end{figure}
+
+As we can see, the number of iterations is $3-4$ times faster 
+than previous methods. Very cool!
+
+For details of the code, we turn the reader towards the git 
+repository by \textit{chuanweiheng-cell} entitled APPM4600.
+Thank you!
+
+\end{document}

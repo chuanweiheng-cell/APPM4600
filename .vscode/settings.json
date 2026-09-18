@@ -1,4 +1,20 @@
 {
     "python-envs.defaultEnvManager": "ms-python.python:conda",
-    "python-envs.defaultPackageManager": "ms-python.python:conda"
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "cSpell.words": [
+        "APPM",
+        "axhline",
+        "chuanweiheng",
+        "dfdx",
+        "facecolor",
+        "figsize",
+        "frameon",
+        "hlines",
+        "labelsize",
+        "markevery",
+        "mathrm",
+        "vmap",
+        "xlabel",
+        "ylabel"
+    ]
 }
