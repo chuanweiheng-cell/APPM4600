@@ -22,52 +22,6 @@ plt.rcParams.update({
 
 def hybrid_method(f, dfdx, d2fdx2, L_boundary, R_boundary,
                   tol=1e-10, max_iter=1000):
-    """
-    Approximate a root using a hybrid bisection-Newton method.
-
-    The method begins with bisection until
-
-        |f(x) f''(x) / f'(x)^2| < 1
-
-    then switches to Newton's method.
-
-    Parameters
-    ----------
-    f : function
-        Function whose root is being approximated.
-
-    dfdx : function
-        First derivative of f.
-
-    d2fdx2 : function
-        Second derivative of f.
-
-    L_boundary : float
-        Left boundary of initial bracketing interval.
-
-    R_boundary : float
-        Right boundary of initial bracketing interval.
-
-    tol : float
-        Desired absolute tolerance.
-
-    max_iter : int
-        Maximum total number of iterations.
-
-    Returns
-    -------
-    root : float
-        Approximation of the root.
-
-    count : int
-        Total number of iterations.
-
-    roots : ndarray
-        Approximation history.
-
-    switch_iteration : int
-        Iteration at which the method switches to Newton's method.
-    """
 
     # Evaluate initial boundaries
     func_L = f(L_boundary)

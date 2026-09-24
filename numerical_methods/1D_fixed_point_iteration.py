@@ -15,41 +15,7 @@ plt.rcParams.update({
 #%% Fixed-point iteration
 
 def fixed_point_iteration(g, p_guess, tol=1e-10, max_iter=1000):
-    """
-    Approximate a fixed point of g(x) using fixed-point iteration.
-
-    Fixed-point iteration generates the sequence
-
-        p_(n+1) = g(p_n)
-
-    until two successive approximations are sufficiently close.
-
-    Parameters
-    ----------
-    g : function
-        Fixed-point mapping.
-
-    p_guess : float
-        Initial guess p_0.
-
-    tol : float
-        Desired absolute tolerance between successive iterates.
-
-    max_iter : int
-        Maximum number of iterations allowed.
-
-    Returns
-    -------
-    root : float
-        Approximation of the fixed point.
-
-    count : int
-        Number of fixed-point iterations performed.
-
-    history : ndarray
-        Fixed-point approximations from each iteration.
-    """
-
+ 
     count = 0
 
     # Store initial guess

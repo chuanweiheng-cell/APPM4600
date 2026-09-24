@@ -15,37 +15,6 @@ plt.rcParams.update({
 #%% Bisection method
 
 def bisection_method(f, L_boundary, R_boundary, tol=1e-10, max_iter=1000):
-    """
-    Approximate a root of f(x) using the bisection method.
-
-    Parameters
-    ----------
-    f : function
-        Function whose root is being approximated.
-
-    L_boundary : float
-        Left boundary of the initial interval.
-
-    R_boundary : float
-        Right boundary of the initial interval.
-
-    tol : float
-        Desired absolute error tolerance.
-
-    max_iter : int
-        Maximum number of iterations allowed.
-
-    Returns
-    -------
-    root : float
-        Approximation of the root.
-
-    count : int
-        Number of bisection iterations performed.
-
-    roots : ndarray
-        Midpoint approximation from every iteration.
-    """
 
     # Evaluate function at initial boundaries
     func_L = f(L_boundary)
