@@ -22,6 +22,11 @@ plt.rcParams.update({
 
 #%% Modified Newton's method 2
 
+'''
+Def'n h(x) = f(x)/f'(x), apply Newton iteration on h(x), i.e. x_{n+1}=x_{n} - h(x)/h'(x)
+'''
+
+
 def modified_newton_method_2(
     h,
     dhdx,
