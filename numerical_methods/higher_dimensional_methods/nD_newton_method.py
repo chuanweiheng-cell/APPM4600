@@ -17,21 +17,18 @@ plt.rcParams.update({
 })
 
 
-#%% n-dimensional lazy Newton's method
+#%% n-dimensional Newton's method
 
-def lazy_newtons_method(F, p_guess, tol=1e-10, max_iter=100):
+def newtons_method(F, p_guess, tol=1e-10, max_iter=1000):
 
     # Convert initial guess to JAX array
     p_guess = jnp.array(
         p_guess,
         dtype=float
     )
-    
+
     # Automatically construct the Jacobian
     jacobian_F = jax.jacfwd(F)
-    
-    # Evaluate a single Jacobian for lazy Newton's
-    J_lazy = jacobian_F(p_guess)
 
     # Store initial guess
     history = [p_guess]
@@ -46,12 +43,14 @@ def lazy_newtons_method(F, p_guess, tol=1e-10, max_iter=100):
             dtype=float
         )
 
+        # Evaluate Jacobian
+        J = jacobian_F(p_guess)
 
         # Solve:
         #
         #     J_F(p_n) delta_p = F(p_n)
         delta_p = jnp.linalg.solve(
-            J_lazy,
+            J,
             F_val
         )
 
@@ -94,62 +93,67 @@ def lazy_newtons_method(F, p_guess, tol=1e-10, max_iter=100):
 
 #%% example
 
-def F(p):
+if __name__ == '__main__':
 
-    x, y = p
+    def F(p):
 
-    return jnp.array([
-        3.0 * x ** 3 - y ** 2,
-        3.0 * x * y ** 2 - jnp.sin(x) ** 3 - 1.0
+        x, y = p
+
+        return jnp.array([
+            3.0 * x ** 3 - y ** 2,
+            3.0 * x * y ** 2 - jnp.sin(x) ** 3 - 1.0
+        ])
+
+
+    p_guess = jnp.array([
+        1.0,
+        1.0
     ])
 
+    tol = 1e-8
 
-p_guess = jnp.array([
-    1.0,
-    1.0
-])
+    root, count, history = newtons_method(
+        F,
+        p_guess,
+        tol=tol
+    )
 
-tol = 1e-8
-
-root, count, history = lazy_newtons_method(
-    F,
-    p_guess,
-    tol=tol
-)
-
-print(f'Root = {root}')
-print(f'Iterations with tol={tol}: {count}')
+    print(f'Root = {root}')
+    print(f'Iterations with tol={tol}: {count}')
 
 
 #%% convergence plot
 
-# Error relative to the converged root
-errors = jnp.linalg.norm(
-    history - root,
-    axis=1
-)
+if __name__ == '__main__':
 
-# Exclude the final point since its error is exactly zero
-iterations = jnp.arange(
-    len(history) - 1
-)
 
-plt.figure(figsize=(8, 5))
+    # Error relative to the converged root
+    errors = jnp.linalg.norm(
+        history - root,
+        axis=1
+    )
 
-plt.semilogy(
-    iterations,
-    errors[:-1],
-    '-o'
-)
+    # Exclude the final point since its error is exactly zero
+    iterations = jnp.arange(
+        len(history) - 1
+    )
 
-plt.xlabel('Iteration')
-plt.ylabel(r'$\|\vec{p}_{n+1}-\vec{p}_n\|_2$')
-plt.title("Newton's Method Convergence")
+    plt.figure(figsize=(8, 5))
 
-plt.grid(
-    True,
-    which='both',
-    alpha=0.3
-)
+    plt.semilogy(
+        iterations,
+        errors[:-1],
+        '-o'
+    )
 
-plt.show()
+    plt.xlabel('Iteration')
+    plt.ylabel(r'$\|\vec{p}_n-\vec{p}^{\,*}\|_2$')
+    plt.title("Newton's Method Convergence")
+
+    plt.grid(
+        True,
+        which='both',
+        alpha=0.3
+    )
+
+    plt.show()

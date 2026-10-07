@@ -1,0 +1,231 @@
+\documentclass[12pt]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                     PREAMBLE / PACKAGES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ----------------------------------------------------------------
+% Font encoding and page geometry
+% ----------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+
+% ----------------------------------------------------------------
+% Line and paragraph spacing
+% ----------------------------------------------------------------
+\usepackage{setspace}
+\usepackage{parskip}
+
+% ----------------------------------------------------------------
+% Section and table-of-contents formatting
+% ----------------------------------------------------------------
+\usepackage{titlesec}
+\usepackage{tocloft}
+
+% ----------------------------------------------------------------
+% Graphics, figures, and page layouts
+% ----------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{animate} % frame-by-frame animations in supported PDF viewers
+\usepackage[font=small]{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{wrapfig}
+\usepackage{multicol}
+
+% ----------------------------------------------------------------
+% Mathematics
+% ----------------------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+\usepackage{cancel}
+\usepackage{gensymb}
+
+% ----------------------------------------------------------------
+% Tables and lists
+% ----------------------------------------------------------------
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{enumitem}
+
+% ----------------------------------------------------------------
+% Colors and highlighting
+% ----------------------------------------------------------------
+\usepackage{xcolor}
+\usepackage{soul}
+\sethlcolor{yellow}
+
+% ----------------------------------------------------------------
+% Headers and footers
+% ----------------------------------------------------------------
+\usepackage{fancyhdr}
+
+% ----------------------------------------------------------------
+% Source-code examples
+% ----------------------------------------------------------------
+\usepackage{listings}
+
+% ----------------------------------------------------------------
+% Citations and hyperlinks
+% ----------------------------------------------------------------
+\usepackage[numbers]{natbib}
+\usepackage{hyperref}
+
+% ----------------------------------------------------------------
+% Default line spacing
+% ----------------------------------------------------------------
+\onehalfspacing
+% ------------------------------------------------------------
+% Document Information
+% ------------------------------------------------------------
+\title{Lab 6}
+\author{Chuan Wei Heng}
+\date{\today}
+
+% ------------------------------------------------------------
+% Document
+% ------------------------------------------------------------
+\begin{document}
+
+\maketitle
+
+\section*{Before lab}
+
+We applied Newton's and Lazy Newton's method to the systems
+
+\[
+\mathbf{F}(x_1, x_2)
+=
+\begin{bmatrix}
+x_1^2 + x_2^2 - 2 \\
+e^{x_1-1} + x_2^2 - 2
+\end{bmatrix}.
+\]
+
+We begin with the initial guesses $\mathbf{x}_0=(2,0.5)$
+and $\mathbf{x}_0=(3,5)$. Interestingly, Newton's method
+converged for the first initial guess but failed for the
+second. As such, the Lazy Newton method was employed for the
+second initial guess.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{subfigure}[t]{0.47\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/pre_lab_newton.png}
+        \caption{Newton iteration for $\mathbf{x_0}=(2, 0.5)$.}
+        \label{fig:two_panel_a}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.47\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/pre_lab_lazy_newton.png}
+        \caption{Lazy Newton iteration for $\mathbf{x_0}=(3, 5)$}
+        \label{fig:two_panel_b}
+    \end{subfigure}
+
+    \caption{Comparison of convergence plots between Newton and Lazy Newton (Also Nikole, I took your suggestion and plotted classical convergence plots!)}
+    \label{fig:two_panel}
+\end{figure}
+
+We can see that, while Newton's method failed to converge,
+the Lazy Newton method did converge, although it required
+significantly more iterations to do so.
+
+
+\section*{Lab Day: Additional Quasi-Newton methods}
+
+In the actual lab, we postulate conditions under which
+the Jacobian should be recomputed. This modified method is
+known as the ``Slacker Newton'' method. The system of interest
+is given by
+
+\[
+\mathbf{F}(x_1, x_2)
+=
+\begin{bmatrix}
+4x_1^2 + x_2^2 - 4 \\
+x_1 + x_2 - sin(x_1-x_2)
+\end{bmatrix}.
+\]
+
+We study the convergence at $\mathbf{x}0=(1,0)$ and
+$\mathbf{x}0=(-1,0)$. The criterion chosen was the
+absolute iteration error. We assign an arbitrary tolerance
+denoted $tol{slacker}$ (for this lab, we set
+$tol{slacker}=10^{-2}$) and recompute the Jacobian whenever
+$||p_{n+1}-p_n||<tol_{slacker}$. The resulting convergence
+behavior is shown below.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{subfigure}[t]{0.47\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/slacker_newton_1.png}
+        \caption{Roots = (0.999 -0.106)}
+        \label{fig:two_panel_a}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.47\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/slacker_newton_2.png}
+        \caption{Roots = (-0.999  0.106)}
+        \label{fig:two_panel_b}
+    \end{subfigure}
+
+    \caption{Lazy Newton’s iteration with stopping criterion $\varepsilon=10^{-10}$.}
+    \label{fig:two_panel}
+
+\end{figure}
+
+Unfortunately, I cannot compare results with my fellow
+brethren from the lab, as I completed the write-up after the lab.
+However, my friend told me that he used a relative error criterion
+and achieved convergence in 4 iterations. This intuitively makes
+sense, as in his code the Jacobian is likely recomputed more
+frequently and, as such, fewer iterations may be required.
+
+As for how this method performs on the example problem from class,
+I genuinely do not know which example the prompt is referring to.
+As such, I am defining an arbitrary 3D nonlinear system to test
+the code on. The system is defined as follows:
+
+\[
+\mathbf{F}(x_1,x_2,x_3)
+=
+\begin{bmatrix}
+4x_1^2+x_2^2-4\sqrt{x_3}\\
+x_1x_3+x_2-\sin(x_1-x_2)\\
+e^{x_3}+x_2^3+6x_1
+\end{bmatrix}.
+\]
+
+\begin{figure}[H]
+
+    \centering
+
+    \includegraphics[width=0.75\linewidth]{figures/slacker_newton_for_random_system.png}
+
+    \caption{Roots=(-1.056, 0.893, 1.73)}
+    \label{fig:single_example}
+
+\end{figure}
+
+Overall, in this lab, we developed a modified Lazy Newton iteration, 
+referred to as the Slacker Newton method. Rather than recomputing the 
+Jacobian at every iteration, which can be computationally expensive, 
+Slacker Newton updates the Jacobian only when necessary. This 
+reduces the total number of Jacobian evaluations while retaining 
+them at iterations where an update is most important.    
+
+For details of the code, we turn the reader towards the git 
+repository by \textit{chuanweiheng-cell} entitled APPM4600.
+Thank you!
+
+\end{document}

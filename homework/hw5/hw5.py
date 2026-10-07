@@ -1,10 +1,24 @@
 #%% imports
+
 import os
 os.environ['JAX_PLATFORMS'] = 'cpu'
+
+import sys
+from pathlib import Path
+
 import jax
 jax.config.update('jax_enable_x64', True)
+
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
+
+# appm4600 project root
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+os.chdir(PROJECT_ROOT)
 
 plt.rcParams.update({
     'font.size': 14,
@@ -73,6 +87,7 @@ def fixed_point_iteration(F, p_guess, tol=1e-10, max_iter=1000):
 
     return root, count, history
 
+
 f = lambda x, y: 3 * x ** 2 - y ** 2
 g = lambda x, y: 3 * x * y ** 2 - x ** 3 - 1
 
@@ -107,9 +122,7 @@ plt.grid(True, which='both', alpha=0.3)
 
 plt.show()
 
-#%% part b
-
-#%% part b
+# part b
 
 def F_vec(p):
 
@@ -214,5 +227,80 @@ plt.ylabel(r'$\|\vec{p}_n-\vec{p}^*\|_2$')
 plt.title("Newton's method Convergence")
 
 plt.grid(True, which='both', alpha=0.3)
+
+plt.show()
+
+
+#%% q3 part b
+
+from numerical_methods.higher_dimensional_methods.nD_normal_newton import normal_newtons_method
+
+# Ellipsoid:
+#
+#     x^2 + 4y^2 + 4z^2 = 16
+#
+# written as:
+#
+#     f(x,y,z) = 0
+def f(p):
+
+    x, y, z = p
+
+    return (
+        x ** 2
+        +
+        4.0 * y ** 2
+        +
+        4.0 * z ** 2
+        -
+        16.0
+    )
+
+
+# Initial guess:
+#
+#     (x_0, y_0, z_0) = (1,1,1)
+p_guess = jnp.array([1.0, 1.0, 1.0])
+
+tol = 1e-10
+
+root, count, history = normal_newtons_method(
+    f,
+    p_guess,
+    tol=tol
+)
+
+print(f'Root = {root}')
+print(f'f(root) = {f(root):.4e}')
+print(f'Iterations with tol={tol}: {count}')
+
+# Error relative to the converged point
+errors = jnp.linalg.norm(
+    history - root,
+    axis=1
+)
+
+# Exclude final point since its error is exactly zero
+iterations = jnp.arange(
+    len(history) - 1
+)
+
+plt.figure(figsize=(8, 5))
+
+plt.semilogy(
+    iterations,
+    errors[:-1],
+    '-o'
+)
+
+plt.xlabel('Iteration')
+plt.ylabel(r'$\|\vec{p}_n-\vec{p}^{\,*}\|_2$')
+plt.title('Normal Newton Iteration Convergence')
+
+plt.grid(
+    True,
+    which='both',
+    alpha=0.3
+)
 
 plt.show()

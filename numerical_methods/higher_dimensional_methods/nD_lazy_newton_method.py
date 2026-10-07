@@ -17,15 +17,25 @@ plt.rcParams.update({
 })
 
 
-#%% n-dimensional fixed-point iteration
+#%% n-dimensional lazy Newton's method
 
-def fixed_point_iteration(G, p_guess, tol=1e-10, max_iter=1000):
+def lazy_newtons_method(F, p_guess, tol=1e-10, max_iter=100):
 
-    # Convert initial guess to a JAX array
+    # Convert initial guess to JAX array
     p_guess = jnp.array(
         p_guess,
         dtype=float
     )
+
+    # Automatically construct the Jacobian function
+    jacobian_F = jax.jacfwd(F)
+
+    # Evaluate the Jacobian once at the initial guess:
+    #
+    #     J_0 = J_F(p_0)
+    #
+    # This matrix remains fixed for every iteration.
+    J_lazy = jacobian_F(p_guess)
 
     # Store initial guess
     history = [p_guess]
@@ -34,13 +44,32 @@ def fixed_point_iteration(G, p_guess, tol=1e-10, max_iter=1000):
 
     while count < max_iter:
 
-        # Fixed-point iteration:
+        # Evaluate nonlinear system at current iterate:
         #
-        #     p_(n+1) = G(p_n)
-        p_new = jnp.array(
-            G(p_guess),
+        #     F(p_n)
+        F_val = jnp.array(
+            F(p_guess),
             dtype=float
         )
+
+        # Lazy Newton step:
+        #
+        #     J_0 delta_p = F(p_n)
+        #
+        # where
+        #
+        #     J_0 = J_F(p_0)
+        #
+        # rather than recomputing J_F(p_n) at every iteration.
+        delta_p = jnp.linalg.solve(
+            J_lazy,
+            F_val
+        )
+
+        # Update:
+        #
+        #     p_(n+1) = p_n - delta_p
+        p_new = p_guess - delta_p
 
         # Error estimate between successive approximations
         err = jnp.linalg.norm(
@@ -56,7 +85,7 @@ def fixed_point_iteration(G, p_guess, tol=1e-10, max_iter=1000):
         # Check convergence
         if err < tol:
 
-            fixed_point = p_new
+            root = p_new
             break
 
         # Update approximation
@@ -65,26 +94,26 @@ def fixed_point_iteration(G, p_guess, tol=1e-10, max_iter=1000):
     else:
 
         raise RuntimeError(
-            f'Fixed-point iteration did not converge within '
+            f'Lazy Newton method did not converge within '
             f'{max_iter} iterations.'
         )
 
     history = jnp.array(history)
 
-    return fixed_point, count, history
+    return root, count, history
 
 
 #%% example
 
 if __name__ == '__main__':
 
-    def G(p):
+    def F(p):
 
         x, y = p
 
         return jnp.array([
-            jnp.cos(y),
-            jnp.sin(x)
+            3.0 * x ** 3 - y ** 2,
+            3.0 * x * y ** 2 - jnp.sin(x) ** 3 - 1.0
         ])
 
 
@@ -95,13 +124,13 @@ if __name__ == '__main__':
 
     tol = 1e-8
 
-    fixed_point, count, history = fixed_point_iteration(
-        G,
+    root, count, history = lazy_newtons_method(
+        F,
         p_guess,
         tol=tol
     )
 
-    print(f'Fixed point = {fixed_point}')
+    print(f'Root = {root}')
     print(f'Iterations with tol={tol}: {count}')
 
 
@@ -109,9 +138,9 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
 
-    # Error relative to the converged fixed point
+    # Error relative to the converged root
     errors = jnp.linalg.norm(
-        history - fixed_point,
+        history - root,
         axis=1
     )
 
@@ -129,8 +158,8 @@ if __name__ == '__main__':
     )
 
     plt.xlabel('Iteration')
-    plt.ylabel(r'$\|\vec{p}_n-\vec{p}^{\,*}\|_2$')    
-    plt.title('Fixed-Point Iteration Convergence')
+    plt.ylabel(r'$\|\vec{p}_n-\vec{p}^{\,*}\|_2$')
+    plt.title("Lazy Newton's Method Convergence")
 
     plt.grid(
         True,
