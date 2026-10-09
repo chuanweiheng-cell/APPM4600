@@ -17,9 +17,9 @@ plt.rcParams.update({
 })
 
 
-#%% n-dimensional lazy Newton's method
+#%% n-dimensional Broyden's method (Sherman-Morrison)
 
-def lazy_newtons_method(F, p_guess, tol=1e-10, max_iter=1000):
+def broydens_method(F, p_guess, tol=1e-10, max_iter=1000):
 
     # Convert initial guess to JAX array
     p_guess = jnp.array(
@@ -27,15 +27,17 @@ def lazy_newtons_method(F, p_guess, tol=1e-10, max_iter=1000):
         dtype=float
     )
 
-    # Automatically construct the Jacobian function
-    jacobian_F = jax.jacfwd(F)
+    # Construct the initial Jacobian only once
+    J = jax.jacfwd(F)(p_guess)
 
-    # Evaluate the Jacobian once at the initial guess:
-    #
-    #     J_0 = J_F(p_0)
-    #
-    # This matrix remains fixed for every iteration.
-    J_lazy = jacobian_F(p_guess)
+    # Initial inverse Jacobian
+    H = jnp.linalg.solve(
+        J,
+        jnp.eye(p_guess.size)
+    )
+
+    # Evaluate nonlinear system
+    F_val = F(p_guess)
 
     # Store initial guess
     history = [p_guess]
@@ -44,32 +46,16 @@ def lazy_newtons_method(F, p_guess, tol=1e-10, max_iter=1000):
 
     while count < max_iter:
 
-        # Evaluate nonlinear system at current iterate:
+        # Broyden step:
         #
-        #     F(p_n)
-        F_val = jnp.array(
-            F(p_guess),
-            dtype=float
-        )
+        #     s_n = -H_n F(p_n)
+        s = -H @ F_val
 
-        # Lazy Newton step:
-        #
-        #     J_0 delta_p = F(p_n)
-        #
-        # where
-        #
-        #     J_0 = J_F(p_0)
-        #
-        # rather than recomputing J_F(p_n) at every iteration.
-        delta_p = jnp.linalg.solve(
-            J_lazy,
-            F_val
-        )
+        # Update approximation
+        p_new = p_guess + s
 
-        # Update:
-        #
-        #     p_(n+1) = p_n - delta_p
-        p_new = p_guess - delta_p
+        # Evaluate nonlinear system at new approximation
+        F_new = F(p_new)
 
         # Error estimate between successive approximations
         err = jnp.linalg.norm(
@@ -82,19 +68,54 @@ def lazy_newtons_method(F, p_guess, tol=1e-10, max_iter=1000):
 
         count += 1
 
+        # Check for divergence
+        if not jnp.all(jnp.isfinite(p_new)) or not jnp.all(jnp.isfinite(F_new)):
+            raise RuntimeError(
+                'Broyden iteration produced non-finite values.'
+            )
+
         # Check convergence
-        if err < tol:
+        if err < tol and jnp.linalg.norm(F_new, ord=2) < tol:
 
             root = p_new
             break
 
-        # Update approximation
+        # Difference in function evaluations:
+        #
+        #     y_n = F(p_(n+1)) - F(p_n)
+        y = F_new - F_val
+
+        # Intermediate products
+        H_y = H @ y
+
+        denominator = s @ H_y
+
+        # Check Sherman-Morrison denominator
+        if jnp.abs(denominator) <= (
+            1e-12 * jnp.linalg.norm(s) * jnp.linalg.norm(H_y)
+        ):
+            raise RuntimeError(
+                'Sherman-Morrison denominator is too small.'
+            )
+
+        # Sherman-Morrison inverse Jacobian update:
+        #
+        #                  (s - H y)(s^T H)
+        #     H_new = H + ------------------
+        #                       s^T H y
+        H = H + jnp.outer(
+            s - H_y,
+            s @ H
+        ) / denominator
+
+        # Update approximation and function evaluation
         p_guess = p_new
+        F_val = F_new
 
     else:
 
         raise RuntimeError(
-            f'Lazy Newton method did not converge within '
+            f'Broyden method did not converge within '
             f'{max_iter} iterations.'
         )
 
@@ -124,7 +145,7 @@ if __name__ == '__main__':
 
     tol = 1e-8
 
-    root, count, history = lazy_newtons_method(
+    root, count, history = broydens_method(
         F,
         p_guess,
         tol=tol
@@ -159,7 +180,7 @@ if __name__ == '__main__':
 
     plt.xlabel('Iteration')
     plt.ylabel(r'$\|\vec{p}_n-\vec{p}^{\,*}\|_2$')
-    plt.title("Lazy Newton's Method Convergence")
+    plt.title("Broyden's Method Convergence")
 
     plt.grid(
         True,
