@@ -1,0 +1,280 @@
+\documentclass[12pt]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                     PREAMBLE / PACKAGES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ----------------------------------------------------------------
+% Font encoding and page geometry
+% ----------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+
+% ----------------------------------------------------------------
+% Line and paragraph spacing
+% ----------------------------------------------------------------
+\usepackage{setspace}
+\usepackage{parskip}
+
+% ----------------------------------------------------------------
+% Section and table-of-contents formatting
+% ----------------------------------------------------------------
+\usepackage{titlesec}
+\usepackage{tocloft}
+
+% ----------------------------------------------------------------
+% Graphics, figures, and page layouts
+% ----------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{animate} % frame-by-frame animations in supported PDF viewers
+\usepackage[font=small]{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{wrapfig}
+\usepackage{multicol}
+
+% ----------------------------------------------------------------
+% Mathematics
+% ----------------------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+\usepackage{cancel}
+\usepackage{gensymb}
+
+% ----------------------------------------------------------------
+% Tables and lists
+% ----------------------------------------------------------------
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{enumitem}
+
+% ----------------------------------------------------------------
+% Colors and highlighting
+% ----------------------------------------------------------------
+\usepackage{xcolor}
+\usepackage{soul}
+\sethlcolor{yellow}
+
+% ----------------------------------------------------------------
+% Headers and footers
+% ----------------------------------------------------------------
+\usepackage{fancyhdr}
+
+% ----------------------------------------------------------------
+% Source-code examples
+% ----------------------------------------------------------------
+\usepackage{listings}
+
+% ----------------------------------------------------------------
+% Citations and hyperlinks
+% ----------------------------------------------------------------
+\usepackage[numbers]{natbib}
+\usepackage{hyperref}
+
+% ----------------------------------------------------------------
+% Default line spacing
+% ----------------------------------------------------------------
+\onehalfspacing
+
+
+\title{Lab 8}
+\author{Chuan Wei Heng}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{3.1 Constructing Piecewise Linear Approximations}
+
+We begin by constructing a piecewise linear spline
+interpolator. The idea is rather simple: given a set of
+interpolation nodes, we construct a straight line between
+each pair of adjacent nodes. The resulting piecewise
+function is continuous, although its first derivative
+is generally discontinuous at the interpolation nodes.
+
+We first test the code on the function
+
+\[
+f(x)=e^x,\qquad x\in[0,1].
+\]
+
+The domain was divided into 10 equally spaced intervals,
+and the resulting approximation is shown below.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figure/3.1.png}
+    \caption{Linear spline interpolation of $f(x)=e^x$
+    using 10 uniformly spaced intervals, together with
+    the corresponding absolute error.}
+    \label{fig:linear_exp}
+\end{figure}
+
+We can see that the linear spline approximates the
+exponential function reasonably well. Interestingly,
+the error vanishes at the interpolation nodes, which
+makes sense since the spline is constructed to pass
+through these points. Between nodes, the error increases
+before returning to zero at the next interpolation point.
+
+
+\section*{3.2 Linear Spline Experiment}
+
+Next, we consider the function
+
+\[
+f(x)=\frac{1}{1+100x^2},\qquad x\in[-1,1].
+\]
+
+Unfortunately, Lab 7 was not even posted, so I am unable
+to reproduce the experiments referenced in the assignment.
+As such, I followed the procedure provided by Professor
+Gillman in her construction of the linear spline code,
+using 10 uniformly spaced intervals and comparing the
+interpolant against the exact function.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figure/3.2.png}
+    \caption{Linear spline approximation of the
+    function using 10 uniformly spaced intervals, together
+    with the corresponding absolute error.}
+    \label{fig:linear_runge}
+\end{figure}
+
+We can see that the approximation is less accurate near
+the center of the domain, where the function changes
+rapidly. The maximum absolute error was approximately
+
+\[
+\|f-S_{\mathrm{linear}}\|_{\infty}
+\approx 1.10\times10^{-1}.
+\]
+
+Nevertheless, the interpolant remains relatively well
+behaved and does not exhibit the large oscillations
+commonly associated with high-degree global polynomial
+interpolation using uniformly spaced nodes.
+
+
+\section*{3.3 Constructing Natural Cubic Splines}
+
+We now extend the linear spline construction to cubic
+splines. Rather than connecting neighboring interpolation
+nodes using straight lines, we construct a cubic polynomial
+on each interval.
+
+Unlike linear splines, we additionally require continuity
+of the first and second derivatives at the interpolation
+nodes. This produces a smoother interpolant.
+
+For this lab, we construct a natural cubic spline, which
+satisfies the boundary conditions
+
+\[
+S''(a)=S''(b)=0.
+\]
+
+Following the formulation provided in the lab, the local
+cubic polynomial is written as
+
+\[
+S_i(x)=
+\frac{
+M_i(x_{i+1}-x)^3+
+M_{i+1}(x-x_i)^3
+}{6h_i}
++C_i(x_{i+1}-x)+D_i(x-x_i),
+\]
+
+where $h_i=x_{i+1}-x_i$ and $M_i=S''(x_i)$.
+
+The coefficients $M_i$ are obtained by constructing and
+solving a tridiagonal linear system, which follows from
+enforcing continuity of the first derivative. Once these
+coefficients are known, the remaining coefficients
+$C_i$ and $D_i$ are evaluated directly.
+
+The resulting spline can then be evaluated on each
+subinterval using the corresponding local cubic polynomial.
+
+
+\section*{3.4 Cubic Spline Experiment}
+
+Finally, we apply the natural cubic spline interpolator
+to the same function considered in Section 3.2:
+
+\[
+f(x)=\frac{1}{1+100x^2},
+\qquad x\in[-1,1].
+\]
+
+We again use 10 uniformly spaced intervals and compare
+the resulting cubic spline against the linear spline
+constructed previously.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figure/3.4.png}
+    \caption{Comparison between linear and natural cubic
+    spline interpolation of the function using
+    10 uniformly spaced intervals.}
+    \label{fig:cubic_runge}
+\end{figure}
+
+Interestingly, the linear spline actually performs better
+than the natural cubic spline for this particular example.
+While the cubic spline is smoother, it exhibits noticeable
+oscillations between some interpolation nodes, particularly
+near the center of the domain.
+
+The maximum absolute errors were approximately
+
+\[
+\begin{aligned}
+\|f-S_{\mathrm{linear}}\|_{\infty}
+&\approx 1.10\times10^{-1},\\
+\|f-S_{\mathrm{cubic}}\|_{\infty}
+&\approx 1.90\times10^{-1}.
+\end{aligned}
+\]
+
+This initially seems counterintuitive, since cubic splines
+are generally expected to provide more accurate approximations
+than linear splines. However, the function varies rapidly
+near $x=0$, and the relatively coarse interpolation grid
+does not adequately resolve this behavior.
+
+As such, the additional smoothness constraints imposed on
+the cubic spline do not necessarily translate into a
+more accurate approximation. With a sufficiently refined
+grid, we would generally expect the cubic spline to
+perform substantially better.
+
+
+\section*{Conclusion}
+
+Overall, in this lab, we constructed both linear and
+natural cubic spline interpolators. The linear spline
+was relatively straightforward to implement, whereas
+the cubic spline required solving a linear system to
+enforce the necessary smoothness conditions.
+
+Interestingly, we observed that the linear spline
+outperformed the cubic spline when approximating the function 
+$\frac{1}{1+(10x)^2}$ using only 10 intervals. This demonstrates
+that a smoother interpolant is not necessarily a more
+accurate one, particularly when the interpolation nodes
+are too widely spaced.
+
+For details of the code, we turn the reader towards the
+Git repository by \textit{chuanweiheng-cell} entitled
+APPM4600. Thank you!
+
+\end{document}
