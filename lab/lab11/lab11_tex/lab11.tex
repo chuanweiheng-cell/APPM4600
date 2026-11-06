@@ -1,0 +1,173 @@
+\documentclass[12pt]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                     PREAMBLE / PACKAGES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ----------------------------------------------------------------
+% Font encoding and page geometry
+% ----------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+
+% ----------------------------------------------------------------
+% Line and paragraph spacing
+% ----------------------------------------------------------------
+\usepackage{setspace}
+\usepackage{parskip}
+
+% ----------------------------------------------------------------
+% Section and table-of-contents formatting
+% ----------------------------------------------------------------
+\usepackage{titlesec}
+\usepackage{tocloft}
+
+% ----------------------------------------------------------------
+% Graphics, figures, and page layouts
+% ----------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage[font=small]{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{placeins}
+
+% ----------------------------------------------------------------
+% Mathematics
+% ----------------------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% ----------------------------------------------------------------
+% Tables and lists
+% ----------------------------------------------------------------
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+
+% ----------------------------------------------------------------
+% Citations and hyperlinks
+% ----------------------------------------------------------------
+\usepackage{hyperref}
+
+% ----------------------------------------------------------------
+% Default line spacing
+% ----------------------------------------------------------------
+\onehalfspacing
+
+\title{Lab 11}
+\author{Chuan Wei Heng}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{2. Before Lab}
+
+We begin by implementing the composite trapezoidal and
+Simpson's rules. Both approximate an integral by dividing
+an interval into smaller pieces, but Simpson's rule uses
+quadratic approximations rather than straight lines.
+
+For $M$ equally spaced points, the spacing is
+$h=(b-a)/(M-1)$. The composite trapezoidal rule is
+
+\[
+I\approx h\left[\frac{f(a)+f(b)}{2}
++\sum_{j=1}^{M-2}f(x_j)\right].
+\]
+
+For Simpson's rule, we use an even number of subintervals.
+In this lab, $M=5$, so there are four subintervals
+within each application of the rule. We also compare
+these methods with the supplied Gauss--Legendre quadrature.
+
+\section*{3. Lab Day}
+
+Next, we apply adaptive quadrature. The idea is to
+approximate the integral on an interval, split that interval
+in half, and compare the result with the sum of the two
+smaller integrals. The difference gives an estimate of
+the error:
+
+\[
+E=\left|I_{\mathrm{left}}+I_{\mathrm{right}}
+-I_{\mathrm{whole}}\right|.
+\]
+
+If this is larger than the chosen tolerance, the interval
+is divided again. Otherwise, we accept the result and
+move on. We use the same adaptive algorithm for all three
+quadrature rules, with five nodes per subinterval and
+a tolerance of $10^{-3}$.
+
+\section*{4. Exercises}
+
+We now approximate
+
+\[
+I=\int_{0.1}^{2}\sin\left(\frac{1}{x}\right)\,dx.
+\]
+
+A reference value obtained using SciPy is approximately
+$I=1.1455808341$. The results from the three methods were
+
+\[
+\begin{aligned}
+I_{\mathrm{trap}} &\approx 1.1453764,\\
+I_{\mathrm{Simpson}} &\approx 1.1455955,\\
+I_{\mathrm{Gauss}} &\approx 1.1455814.
+\end{aligned}
+\]
+
+The corresponding absolute errors were approximately
+$2.04\times10^{-4}$, $1.47\times10^{-5}$, and
+$5.51\times10^{-7}$, respectively. All three methods
+therefore achieved the requested accuracy.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figure/adaptive_intervals.png}
+    \caption{Adaptive intervals used by the three quadrature methods.}
+    \label{fig:adaptive_intervals}
+\end{figure}
+
+From the figure, we can see that the methods use more
+intervals near $x=0.1$, where the function oscillates
+more rapidly. The composite trapezoidal rule required
+9 intervals, Simpson's rule required 6, and Gauss--Legendre
+required only 5.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figure/absolute_errors.png}
+    \caption{Absolute errors for the three adaptive quadrature methods.
+    The dashed line indicates the required tolerance.}
+    \label{fig:quadrature_errors}
+\end{figure}
+
+Interestingly, Gauss--Legendre quadrature performs best
+for this example, both in terms of the number of intervals
+used and the resulting accuracy. This makes sense since
+Gaussian quadrature can integrate higher-degree polynomials
+exactly with the same number of nodes.
+
+\section*{Conclusion}
+
+Overall, we implemented three adaptive quadrature methods
+and compared their performance on the same integral.
+Gauss--Legendre was the best choice in this experiment,
+requiring only 5 intervals to achieve the desired accuracy,
+compared with 6 for Simpson's rule and 9 for the
+trapezoidal rule.
+
+This also demonstrates why adaptive quadrature is useful:
+we can concentrate more points where the function changes
+rapidly, instead of using a uniformly fine grid everywhere.
+
+For details of the code, we turn the reader towards the
+Git repository by \textit{chuanweiheng-cell} entitled
+APPM4600. Thank you!
+
+\end{document}
