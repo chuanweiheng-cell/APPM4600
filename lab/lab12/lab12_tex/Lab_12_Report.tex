@@ -1,0 +1,56 @@
+\documentclass[12pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{amsmath}
+\setstretch{1.0}
+
+\title{Lab 12}
+\author{Chuan Wei Heng}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{3.2 Exercises}
+
+We compare \texttt{scipy.linalg.solve} and LU factorization for the square
+system $Ax=b$, using $N=100,500,1000,2000,4000,$ and $5000$. In an
+initial test with $N=5000$, the direct solver took $1.1674$ s and the
+combined LU method took $0.7059$ s. We still need the $N=4000$ result
+and separate timings for LU factorization and triangular substitution.
+
+For $k$ different right-hand sides, reusing the LU factorization is
+faster when
+\[
+k>\frac{t_{\mathrm{factor}}}
+{t_{\mathrm{direct}}-t_{\mathrm{triangular}}}.
+\]
+The numerical break-even count depends on the separate timings.
+
+\section*{3.4 Exercises}
+
+For an overdetermined system ($N>M$), we compare the normal equations
+with reduced QR factorization:
+\[
+A^TAx=A^Tb,\qquad A=QR,\quad Rx=Q^Tb.
+\]
+We validate both by choosing $x_{\mathrm{true}}$, setting
+$b=Ax_{\mathrm{true}}$, and checking the residual and solution error.
+
+With the original smallest singular value $10^{-10}$,
+$\kappa_2(A)=10^9$ and $\kappa_2(A^TA)=10^{18}$. Reducing it to
+$10^{-12}$ increases these to $10^{11}$ and $10^{22}$, respectively.
+QR should be more accurate because the normal equations square the
+condition number. Numerical errors still need to be recorded.
+
+\section*{Conclusion}
+
+Reusing LU is advantageous for multiple right-hand sides, while QR is
+more reliable for ill-conditioned least-squares problems. The completed
+code must be pushed to the \textit{chuanweiheng-cell} APPM4600 Git
+repository, and the answers submitted on Canvas.
+
+\end{document}

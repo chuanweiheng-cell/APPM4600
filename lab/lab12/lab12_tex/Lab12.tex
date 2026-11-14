@@ -1,0 +1,82 @@
+
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[margin=0.83in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{parskip}
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{1.2ex}{0.2ex}
+\usepackage{setspace}
+\setstretch{1.0}
+
+\title{Lab 12}
+\author{Chuan Wei Heng}
+\date{\today}
+
+\begin{document}
+\maketitle
+\vspace{-1.6em}
+
+\section*{3.2 Exercises}
+
+We compared the SciPy direct solver and LU factorization for six square
+matrices. The timings (seconds) separate LU factorization from solving:
+
+\begin{center}
+\small
+\begin{tabular}{rcccc}
+\toprule
+$N$ & Direct solve & LU factorization & LU solve & Break-even RHS \\
+\midrule
+100  & 0.0036 & 0.0005 & 0.0001 & 1 \\
+500  & 0.0823 & 0.0555 & 0.0006 & 1 \\
+1000 & 0.0177 & 0.0198 & 0.0032 & 2 \\
+2000 & 0.1057 & 0.0572 & 0.0022 & 1 \\
+4000 & 0.9368 & 0.4713 & 0.0053 & 1 \\
+5000 & 1.8065 & 0.9918 & 0.0178 & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+With the same matrix and $k$ right-hand sides, LU reuse is faster when
+$k>t_{\mathrm{factor}}/(t_{\mathrm{direct}}-t_{\mathrm{LU\ solve}})$.
+The measured break-even point was one right-hand side except for
+$N=1000$, where it was two.
+
+\section*{3.4 Exercises}
+
+For $A\in\mathbb{R}^{100\times50}$, we compared the normal equations
+$A^TAx=A^Tb$ with QR ($Rx=Q^Tb$). We chose $x_{\mathrm{true}}=\mathbf{1}$
+and $b=Ax_{\mathrm{true}}$ to evaluate residuals and solution errors.
+
+\begin{center}
+\small
+\begin{tabular}{llccc}
+\toprule
+Smallest $d$ & Method & Time (s) & Relative residual & Relative error \\
+\midrule
+$10^{-10}$ & Normal equations & 0.0228 & $7.65\times10^{-8}$ & $5.61$ \\
+           & QR               & 0.0634 & $3.61\times10^{-16}$ & $5.56\times10^{-9}$ \\
+$10^{-12}$ & Normal equations & 0.0011 & $2.82\times10^{-7}$ & $21.0$ \\
+           & QR               & 0.0033 & $3.58\times10^{-16}$ & $2.98\times10^{-7}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Reducing the smallest singular value increased $\kappa_2(A)$ from
+$10^9$ to $10^{11}$. The normal equations produced large errors and
+ill-conditioning warnings; QR was much more accurate because it avoids
+forming $A^TA$, which squares the condition number.
+
+\section*{Conclusion}
+
+LU reuse can save time, while QR is more reliable for ill-conditioned
+least-squares problems. The matrices are random, so measured results
+can vary between runs. 
+
+For details of the code, we turn the reader towards the Git repository by chuanweiheng-cell
+entitled APPM4600. Thank you!
+
+\end{document}

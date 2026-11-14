@@ -1,0 +1,155 @@
+
+#%% Import header
+import numpy as np
+from scipy.special import gamma
+
+
+#%% part (a)
+
+def gamma_trapezoidal(x, upper_limit, step_size):
+    n = int(np.ceil(upper_limit / step_size))
+    h = upper_limit / n
+
+    t = np.linspace(0, upper_limit, n + 1)
+    f = t**(x - 1) * np.exp(-t)
+
+    estimate = h * (0.5*f[0] + np.sum(f[1:-1]) + 0.5*f[-1])
+
+    return estimate, n
+
+
+# Experiment 1: Effect of truncation limit
+
+h_test = 0.002
+
+print('Study on truncation')
+for L in [20, 30, 40, 50]:
+    estimate, _ = gamma_trapezoidal(10, L, h_test)
+    error = abs(estimate - gamma(10)) / gamma(10)
+
+    print(f'L = {L}, relative error = {error:.6e}')
+
+
+# Experiment 2: Effect of step size
+
+L_test = 50.0
+
+print('\nStudy on step size')
+for h in [0.1, 0.02, 0.01, 0.005, 0.002]:
+    estimate, _ = gamma_trapezoidal(2, L_test, h)
+    error = abs(estimate - gamma(2)) / gamma(2)
+
+    print(f'h = {h}, relative error = {error:.6e}')
+
+
+# Final comparison with scipy.special.gamma
+
+L = 50.0
+h = 0.002
+x_values = [2, 4, 6, 8, 10]
+
+print('\nFinal results')
+print('x     Approximation       Reference           Relative error')
+
+for x in x_values:
+    estimate, n = gamma_trapezoidal(x, L, h)
+    reference = gamma(x)
+
+    relative_error = abs(estimate - reference) / reference
+
+    print(f'{x:<5} {estimate:<19.10f} ' f'{reference:<19.10f} {relative_error:.6e}')
+
+#%% part (b)
+
+def integrand(t, x):
+    return t**(x-1)*np.exp(-t)
+
+def composite_trap(x, L, n):
+    h = L/n
+    t = np.linspace(0, L, n+1)
+    f = integrand(t, x)
+
+    return h*(f[0]/2 + np.sum(f[1:-1]) + f[-1]/2)
+
+from scipy.integrate import quad
+
+# Parameters from Q4(a)
+
+n = int(L/h)
+
+x_values = [2, 4, 6, 8, 10]
+
+def integrand(t, x):
+    return t**(x-1)*np.exp(-t)
+
+def composite_trap(x, L, n):
+    h = L/n
+    t = np.linspace(0, L, n+1)
+    f = integrand(t, x)
+
+    return h*(f[0]/2 + np.sum(f[1:-1]) + f[-1]/2)
+
+
+# Compare relative errors and function evaluations
+
+print(f'{"x":<5} {"Trap Error":<16} {"Quad Error":<16} '
+      f'{"Trap Evals":<14} {"Quad Evals":<12}')
+
+for x in x_values:
+
+    # Composite trapezoidal rule
+    I_trap = composite_trap(x, L, n)
+    trap_evals = n + 1
+
+    # Adaptive quadrature
+    I_quad, error_est, info = quad(
+        integrand, 0, L,
+        args=(x,),
+        epsabs=1e-11,
+        epsrel=1e-11,
+        full_output=True
+    )
+
+    quad_evals = info['neval']
+
+    # Reference solution
+    I_exact = gamma(x)
+
+    # Relative errors
+    err_trap = abs(I_trap - I_exact)/I_exact
+    err_quad = abs(I_quad - I_exact)/I_exact
+
+    print(f'{x:<5} {err_trap:<16.6e} {err_quad:<16.6e} '
+          f'{trap_evals:<14} {quad_evals:<12}')
+
+
+#%% Part (c): Gauss-Laguerre quadrature
+
+from numpy.polynomial.laguerre import laggauss
+
+# Number of quadrature nodes
+n = 5
+
+# Obtain nodes and weights
+nodes, weights = laggauss(n)
+
+x_values = [2, 4, 6, 8, 10]
+
+print(f'{"x":<5} {"Approximation":<20} {"Reference":<20} '
+      f'{"Relative Error":<18} {"Evals":<8}')
+
+for x in x_values:
+
+    # Gauss-Laguerre quadrature
+    estimate = np.sum(weights * nodes**(x-1))
+
+    # Reference solution
+    reference = gamma(x)
+
+    # Relative error
+    relative_error = abs(estimate - reference)/reference
+
+    print(f'{x:<5} {estimate:<20.10f} {reference:<20.10f} '
+          f'{relative_error:<18.6e} {n:<8}')
+
+
